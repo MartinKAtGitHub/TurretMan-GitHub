@@ -5,7 +5,7 @@
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
-public class PlayerController : MonoBehaviour
+public class CharacterMovement : MonoBehaviour
 {
 
     [SerializeField] private readonly string HorizontalAxisName = "Horizontal";
