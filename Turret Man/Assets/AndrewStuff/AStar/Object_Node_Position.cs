@@ -10,8 +10,6 @@ public class Object_Node_Position : MonoBehaviour {
 	//	[HideInInspector]
 	public int YNode = 0;
 
-	float SaveVariable = 0;
-
 	public void Update() {
 		CalculateNodePos(transform.position);
 	}
