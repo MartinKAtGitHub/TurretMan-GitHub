@@ -10,8 +10,6 @@ public class Object_Node_Position : MonoBehaviour {
 	//	[HideInInspector]
 	public int YNode = 0;
 
-	float SaveVariable = 0;
-
 	public void Update() {
 		CalculateNodePos(transform.position);
 	}
@@ -19,19 +17,19 @@ public class Object_Node_Position : MonoBehaviour {
 
 	public void CalculateNodePos(Vector3 pos) {
 
-		XNode = Mathf.FloorToInt(pos.x / TankMan_WorldChanger.DistanceBetweenNodes) + TankMan_WorldChanger.NodesSizeHalf;
-		YNode = Mathf.FloorToInt(pos.y / TankMan_WorldChanger.DistanceBetweenNodes) + TankMan_WorldChanger.NodesSizeHalf;
+		XNode = Mathf.FloorToInt(pos.x / TurretMan_WorldChanger.DistanceBetweenNodes) + TurretMan_WorldChanger.NodesSizeHalf;
+		YNode = Mathf.FloorToInt(pos.y / TurretMan_WorldChanger.DistanceBetweenNodes) + TurretMan_WorldChanger.NodesSizeHalf;
 
 		if (XNode < 0) {
 			XNode = 0;
-		} else if (XNode >= TankMan_WorldChanger.NodesSize) {
-			XNode = TankMan_WorldChanger.NodesSize - 1;
+		} else if (XNode >= TurretMan_WorldChanger.NodesSize) {
+			XNode = TurretMan_WorldChanger.NodesSize - 1;
 		}
 
 		if (YNode < 0) {
 			YNode = 0;
-		} else if (YNode >= TankMan_WorldChanger.NodesSize) {
-			YNode = TankMan_WorldChanger.NodesSize - 1;
+		} else if (YNode >= TurretMan_WorldChanger.NodesSize) {
+			YNode = TurretMan_WorldChanger.NodesSize - 1;
 		}
 
 	}

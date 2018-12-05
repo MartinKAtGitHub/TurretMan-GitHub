@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TankMan_WorldChanger {
+public class TurretMan_WorldChanger {
 
 	//If The Maps Center Isnt 0,0, meaning 
 	public const float CenterX = 0;
@@ -17,6 +17,10 @@ public class TankMan_WorldChanger {
 	public const int NodesSize = (int)(NodesInUnityMeter / DistanceBetweenNodes);
 	public const int NodesSizeHalf = (int)(NodesInUnityMeter / DistanceBetweenNodes) / 2;
 	public const int NodesTotal = NodesSize * NodesSize;
+
+
+
+
 
 	//-----------------------------
 
