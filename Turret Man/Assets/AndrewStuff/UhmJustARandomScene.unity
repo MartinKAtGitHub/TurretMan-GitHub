@@ -294,11 +294,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8119a5b1a6f2ab4c8123baff71f3bd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SizeOfMapDiameter: 2
+  TrianglePointsDistance: 0.5
+  TrianglePointsStartXPoint: -2
+  TrianglePointsStartYPoint: -2
+  TrianglePointsWidth: 9
+  TrianglePointsHeight: 9
   TheTriangleMaker: {fileID: 114360703237322816, guid: 208e9c7ddb27b2a4ca21e8c040673e6b,
     type: 2}
   points:
-  - {x: -2, y: 2}
+  - {x: 0, y: 0}
   - {x: 2, y: -2}
   - {x: 2.0597783e-35, y: 0}
   - {x: 4.6e-44, y: 0}

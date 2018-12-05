@@ -5,8 +5,8 @@ using UnityEngine;
 public class AStar : MonoBehaviour {
 
 	//float[] PathfindingNodeID = new float[TankMan_WorldChanger.PathCostSize];//Currently Normalground 0 - Wall 1 - Other Creatures 2. TODO add More And Remember To Update
-	Node[] _OpenList = new Node[TankMan_WorldChanger.NodesTotal];//list that holds nodes that i havent searched through
-	Node[] _ClosedList = new Node[TankMan_WorldChanger.NodesTotal];//list that have been searched through
+	Node[] _OpenList = new Node[TurretMan_WorldChanger.NodesTotal];//list that holds nodes that i havent searched through
+	Node[] _ClosedList = new Node[TurretMan_WorldChanger.NodesTotal];//list that have been searched through
 
 /*	public Node[] ol() {//Delete this if done checking
 		return _OpenList;
@@ -15,7 +15,7 @@ public class AStar : MonoBehaviour {
 		return _ClosedList;
 	}*/
 
-	Node[,] _NodeMap = new Node[TankMan_WorldChanger.NodesSize, TankMan_WorldChanger.NodesSize];
+	Node[,] _NodeMap = new Node[TurretMan_WorldChanger.NodesSize, TurretMan_WorldChanger.NodesSize];
 
 	public Node[,] getnodemap() {
 		return _NodeMap;
@@ -45,11 +45,11 @@ public class AStar : MonoBehaviour {
 		//	_WalkCost.SetNodeSize (sceneStartup);//Creating Node Cost Array
 		int Added = 0;
 
-		for (int x = 0; x < TankMan_WorldChanger.NodesSize; x++) {//Creating Nodes Nodes
-			for (int y = 0; y < TankMan_WorldChanger.NodesSize; y++) {
-				if ((x == 0 && y == 0) || (x == 0 && y == TankMan_WorldChanger.NodesSize - 1) || (x == TankMan_WorldChanger.NodesSize - 1 && y == 0) || (x == TankMan_WorldChanger.NodesSize - 1 && y == TankMan_WorldChanger.NodesSize - 1)) {//Corners
+		for (int x = 0; x < TurretMan_WorldChanger.NodesSize; x++) {//Creating Nodes Nodes
+			for (int y = 0; y < TurretMan_WorldChanger.NodesSize; y++) {
+				if ((x == 0 && y == 0) || (x == 0 && y == TurretMan_WorldChanger.NodesSize - 1) || (x == TurretMan_WorldChanger.NodesSize - 1 && y == 0) || (x == TurretMan_WorldChanger.NodesSize - 1 && y == TurretMan_WorldChanger.NodesSize - 1)) {//Corners
 					_NodeMap[x, y] = new Node(x, y, 0);
-				} else if (x == 0 || x == TankMan_WorldChanger.NodesSize - 1 || y == 0 || y == TankMan_WorldChanger.NodesSize - 1) {//Sides
+				} else if (x == 0 || x == TurretMan_WorldChanger.NodesSize - 1 || y == 0 || y == TurretMan_WorldChanger.NodesSize - 1) {//Sides
 					_NodeMap[x, y] = new Node(x, y, 1);
 				} else {//Middles
 					_NodeMap[x, y] = new Node(x, y, 2);
@@ -58,8 +58,8 @@ public class AStar : MonoBehaviour {
 		}
 
 
-		for (int x = 1; x < TankMan_WorldChanger.NodesSize - 1; x++) {//Giving Middle Nodes Neighbour Nodes
-			for (int y = 1; y < TankMan_WorldChanger.NodesSize - 1; y++) {
+		for (int x = 1; x < TurretMan_WorldChanger.NodesSize - 1; x++) {//Giving Middle Nodes Neighbour Nodes
+			for (int y = 1; y < TurretMan_WorldChanger.NodesSize - 1; y++) {
 				Added = 0;
 				for (int k = -1; k < 2; k++) {
 					for (int h = -1; h < 2; h++) {
@@ -72,8 +72,8 @@ public class AStar : MonoBehaviour {
 		}
 
 
-		for (int x = 0; x < TankMan_WorldChanger.NodesSize; x += (TankMan_WorldChanger.NodesSize - 1)) {//Giving Corner Nodes Neighbour Nodes
-			for (int y = 0; y < TankMan_WorldChanger.NodesSize; y += (TankMan_WorldChanger.NodesSize - 1)) {
+		for (int x = 0; x < TurretMan_WorldChanger.NodesSize; x += (TurretMan_WorldChanger.NodesSize - 1)) {//Giving Corner Nodes Neighbour Nodes
+			for (int y = 0; y < TurretMan_WorldChanger.NodesSize; y += (TurretMan_WorldChanger.NodesSize - 1)) {
 
 				Added = 0;
 				if (x == 0) {
@@ -116,8 +116,8 @@ public class AStar : MonoBehaviour {
 			}
 		}
 
-		for (int x = 1; x < TankMan_WorldChanger.NodesSize - 1; x++) {//Giving X-Side Nodes Neighbour Nodes
-			for (int y = 0; y < TankMan_WorldChanger.NodesSize; y += (TankMan_WorldChanger.NodesSize - 1)) {
+		for (int x = 1; x < TurretMan_WorldChanger.NodesSize - 1; x++) {//Giving X-Side Nodes Neighbour Nodes
+			for (int y = 0; y < TurretMan_WorldChanger.NodesSize; y += (TurretMan_WorldChanger.NodesSize - 1)) {
 
 				Added = 0;
 				if (y == 0) {
@@ -144,8 +144,8 @@ public class AStar : MonoBehaviour {
 			}
 		}
 
-		for (int x = 0; x < TankMan_WorldChanger.NodesSize; x += (TankMan_WorldChanger.NodesSize - 1)) {//Creating Y-SideNodes
-			for (int y = 1; y < TankMan_WorldChanger.NodesSize - 1; y++) {
+		for (int x = 0; x < TurretMan_WorldChanger.NodesSize; x += (TurretMan_WorldChanger.NodesSize - 1)) {//Creating Y-SideNodes
+			for (int y = 1; y < TurretMan_WorldChanger.NodesSize - 1; y++) {
 
 				Added = 0;
 				if (x == 0) {
@@ -172,7 +172,7 @@ public class AStar : MonoBehaviour {
 			}
 		}
 
-		_TheStartNode = _NodeMap[((TankMan_WorldChanger.NodesSize - 1) / 2), ((TankMan_WorldChanger.NodesSize - 1) / 2)];
+		_TheStartNode = _NodeMap[((TurretMan_WorldChanger.NodesSize - 1) / 2), ((TurretMan_WorldChanger.NodesSize - 1) / 2)];
 		_OpenListAtIndex = 0;
 		_ClosedListAtIndex = 0;
 
@@ -202,13 +202,13 @@ public class AStar : MonoBehaviour {
 		_NodeXPos = Mathf.FloorToInt(_TheStartNode.PosX + (taget.XNode - me.XNode));
 		_NodeYPos = Mathf.FloorToInt(_TheStartNode.PosY + (taget.YNode - me.YNode));
 
-		if (_NodeXPos >= TankMan_WorldChanger.NodesSize) {
-			_NodeXPos = TankMan_WorldChanger.NodesSize - 1;
+		if (_NodeXPos >= TurretMan_WorldChanger.NodesSize) {
+			_NodeXPos = TurretMan_WorldChanger.NodesSize - 1;
 		} else if (_NodeXPos < 0) {
 			_NodeXPos = 0;
 		}
-		if (_NodeYPos >= TankMan_WorldChanger.NodesSize) {
-			_NodeYPos = TankMan_WorldChanger.NodesSize - 1;
+		if (_NodeYPos >= TurretMan_WorldChanger.NodesSize) {
+			_NodeYPos = TurretMan_WorldChanger.NodesSize - 1;
 		} else if (_NodeYPos < 0) {
 			_NodeYPos = 0;
 		}
@@ -222,7 +222,7 @@ public class AStar : MonoBehaviour {
 
 		#region A* Algorythm
 
-		while (_ClosedListAtIndex < TankMan_WorldChanger.NodesTotal) {//If The ClosedListAtIndex Is Equalt To Or Greater The Total Amount Of Nodes Then This Is False And The Search Is Stopped
+		while (_ClosedListAtIndex < TurretMan_WorldChanger.NodesTotal) {//If The ClosedListAtIndex Is Equalt To Or Greater The Total Amount Of Nodes Then This Is False And The Search Is Stopped
 			_LowerstFScore = 10000000;
 
 			for (int i = 0; i < _OpenListAtIndex; i++) {//Iterating Through The List With Unused Nodes To Find The Node With The Lowerst FCost

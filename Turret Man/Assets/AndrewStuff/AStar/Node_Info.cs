@@ -12,10 +12,10 @@ public class Node_Info : MonoBehaviour {
 	public AStar MyAStar;
 
 	[Tooltip("PathfindingNodeID is the cost to move to the different nodes //// 0 = normal nodes //// 1 = undestructable walls //// 2 = other units")]
-	public float[] PathfindingNodeID = new float[TankMan_WorldChanger.PathCostSize];//Currently Normalground 0 - Wall 1 - Other Creatures 2. TODO add More
+	public float[] PathfindingNodeID = new float[TurretMan_WorldChanger.PathCostSize];//Currently Normalground 0 - Wall 1 - Other Creatures 2. TODO add More
 
 	[HideInInspector]
-	public Node[] MyNodePath = new Node[TankMan_WorldChanger.NodesTotal / 10];//TODO Need To Do Something Else Here. Its Going To Take To Much Memory If All Enemies Do This.
+	public Node[] MyNodePath = new Node[TurretMan_WorldChanger.NodesTotal / 10];//TODO Need To Do Something Else Here. Its Going To Take To Much Memory If All Enemies Do This.
 
 
 
