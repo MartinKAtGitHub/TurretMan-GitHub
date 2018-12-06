@@ -12,6 +12,9 @@ public class Scene_Startup : MonoBehaviour {
 	public int TrianglePointsWidth = 5;
 	public int TrianglePointsHeight = 5;
 
+	//Where The Amount Of Triangles Starts To Increase, The First Search Method Starts To Use More And More Power. There Is An Alternative Method That Is Slow With A Low Amount Of Triangles But "Super Fast" With Alot Of Triangles.
+	//So This Number Switches The Search Method When The Amount Of Triangles Reach This Number. The Size Of The Map Will Also Change The Use Of This Number, So 100 Is Default. 
+	public int TrianglesNeededToSwitchSearchMethod = 100;
 	//-------------------------------
 
 
@@ -42,10 +45,11 @@ public class Scene_Startup : MonoBehaviour {
 			//	TheTriangleMaker.LineCheckup(testing, points[0], points[1]);
 			//	TheTriangleMaker.PointCheckup(testing, points[0]);
 
-			for (int i = 0; i < 1000; i++) {
-				test();
-			}
-			//TheTriangleMaker.CheckIfPointIsInside(points[0]);
+		
+			TheTriangleMaker.CheckIfPointIsInside(points);
+		//	TheTriangleMaker.BeforeCheck(points);
+
+
 			//TheTriangleMaker.LineCheckup(Triangles[0], points[0], points[1]);
 			
 			updateCheck = false;
@@ -56,13 +60,7 @@ public class Scene_Startup : MonoBehaviour {
 		}
 	}
 
-	void test() {
-		if (TrianglePoints[0, 0].triangleRef.Count > 0) {
-		}
-	}
-
-
-
+	public bool disableboxlines = false;
 	private void OnDrawGizmos() {
 
 		if (DrawTriangles == true) {
@@ -74,8 +72,14 @@ public class Scene_Startup : MonoBehaviour {
 				Gizmos.DrawLine(Triangles[i].A, Triangles[i].C);
 			}
 
-			Gizmos.color = Color.white;
-			Gizmos.DrawLine(points[0], points[1]);
+			if (disableboxlines == false) {
+
+				Gizmos.color = Color.white;
+				Gizmos.DrawLine(points[0], points[1]);
+				Gizmos.DrawLine(points[1], points[2]);
+				Gizmos.DrawLine(points[2], points[3]);
+				Gizmos.DrawLine(points[3], points[0]);
+			}
 			Gizmos.color = Color.black;
 
 			

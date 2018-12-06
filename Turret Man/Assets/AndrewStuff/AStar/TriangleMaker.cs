@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Hmmmm, This Scrip Only Need To Be Initialized Once, Data Seem To Be Saved On The Prefab, So Its Kinda Like A Singleton. Where You Can Actualy Run Methods In Here While Starting The Game.
+
 //Potential "Bug" may occur, when only one point is placed. the "bug" occur when a point is place on the line between to points, then one triangle will be merged with another. to fix this there needs to be a special case check where if a point is placed on an existing tirangle side, then that tiangle which connect from the points on the end of the line and the point dissapair.
 //But this is a special case, that might never happen cuz no wall or item can take one mappoint. soo its just a prewarning for something that may occur if the rules of the system isnt followed, which in all reality it should.
 public class TriangleMaker : MonoBehaviour {
@@ -16,40 +18,6 @@ public class TriangleMaker : MonoBehaviour {
 
 
 
-
-	[Tooltip("Changes From A Perfect Rectangle To The Current Where New Shapes In From Of Rectangles Are Added One By One")]
-	public Vector2[] CoreMapAlterations;//Holding All Objects, So That If Stuff Goes Wrong I Can Reload?
-
-	Triangles triangle;
-	PointsForTriangles[,] pointMap;
-
-	List<Triangles> TriangleGroups = new List<Triangles>();
-
-	float _denominator = 0;
-	float _numerator1 = 0;
-	float _numerator2 = 0;
-	float _r = 0;
-	float _s = 0;
-
-	int startpoint = 0;
-
-	Triangles removed = null;
-	Triangles newTriangle = null;
-
-	List<Vector2> points = new List<Vector2>();
-
-	Scene_Startup _SceneDetails;
-
-
-
-	public void TriangleMakerSetup(Scene_Startup info) {
-
-		_SceneDetails = info;
-		pointMap = new PointsForTriangles[info.TrianglePointsWidth, info.TrianglePointsHeight];
-		Maketrianglepoints();
-		CreateStartTriangle();
-
-	}
 
 	//go through all mappoints and check is there is a trianglecorner on that point. (it increase seach speed.)
 	//if no points are on the new points. then the seach begin (go to 2.)
@@ -86,7 +54,65 @@ public class TriangleMaker : MonoBehaviour {
 
 
 
-	//2.
+
+	//ok so i cannot use only point triangle check. cuz triangles may go between points.
+	//but line collision search may be in the middle of a triangle, then an infinite loop will occur. so i cannot to this.
+
+	//since point triangle is abit cheaper, then i will start with a point triangle search. when a triangle is found, i will check if there are some points that are not within the triangle
+	//if there are points outside, i need to do additional searches from the neighbour triangles of the triangle the first point was in.
+	//when all of the points are found the search is over, and the next step of creating new triangles can begin.
+
+
+	//but just doing a simple look in all points around the object, looking for a point that have a triangle attached to it. if that is the case a more expensive test can begin. but from what i can see. simple point check, is 6 times cheaper then searching a triangle.
+	//so the bigger the map (with few walls) and the lower amount of triangles that exist, the less effective this method is.
+	//so from pure guessing. i think that if i have less than 100 triangles then this wont be the most effective way. 
+	//so there needs to be a simple value that can be changed that can increase and decrease the amount needed to do this method.
+
+
+
+	//so how can i make this alot easier.
+	//* have object search for which triangle they are in, the entire time. if they move out of their triangle, then its simply the next neighbour triangle they are in.
+	//  thats realy not that expensive and we can probably have several hundred enemies doing this the entire time every frame.
+
+
+
+
+
+
+
+	[Tooltip("Changes From A Perfect Rectangle To The Current Where New Shapes In From Of Rectangles Are Added One By One")]
+	public Vector2[] CoreMapAlterations;//Holding All Objects, So That If Stuff Goes Wrong I Can Reload?
+
+	Triangles triangle;
+	Triangles removed = null;
+	PointsForTriangles[,] pointMap;
+	Scene_Startup _SceneDetails;
+
+	List<Triangles> TriangleGroups = new List<Triangles>();
+
+	float _denominator = 0;
+	float _numerator1 = 0;
+	float _numerator2 = 0;
+	float _r = 0;
+	float _s = 0;
+
+	int LeftX = 0;
+	int RightX = 0;
+	int Upper = 0;
+	int Lower = 0;
+
+
+
+
+
+	public void TriangleMakerSetup(Scene_Startup info) {
+
+		_SceneDetails = info;
+		pointMap = new PointsForTriangles[info.TrianglePointsWidth, info.TrianglePointsHeight];
+		Maketrianglepoints();
+		CreateStartTriangle();
+
+	}
 
 
 
@@ -136,6 +162,28 @@ public class TriangleMaker : MonoBehaviour {
 
 
 
+	public void DoTheSearch(Vector2[] points) {
+
+		if (TriangleGroups.Count < _SceneDetails.TrianglesNeededToSwitchSearchMethod * 0.1f) {
+			CheckIfPointIsInside(points);//Since There Is So Few Triangles Im Just Doing A BruteForce Search
+		} else {
+
+			if(TriangleGroups.Count < _SceneDetails.TrianglesNeededToSwitchSearchMethod) {
+
+			} else {
+
+			}
+
+			if(BeforeCheck(points) == true) {//Something Was Found
+				FoundFirstTriangleExtensionSearch();
+			} else { //Continue With BruteForce Search
+				CheckIfPointIsInside(points);
+			}
+		}
+
+
+
+	}
 
 
 
@@ -143,53 +191,707 @@ public class TriangleMaker : MonoBehaviour {
 
 
 
-	public void CheckIfPointIsInside(Vector2 point) {
 
-		startpoint = TriangleGroups.Count - 1;
+	public bool BeforeCheck(Vector2[] point) {//Going Through All Points Within The Objects Size. This Makes The Next Search Alot Faster
 
-		for (int j = startpoint; j >= 0; j--) {
+		LeftX = (int)((point[3].x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance);//X == upper left
+		RightX = (int)((point[1].x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance);
 
-			points.Clear();
-			removed = TriangleGroups[j];
+		Lower = (int)((point[3].y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance);//y == lower right
+		Upper = (int)((point[1].y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance);
 
-			if (PointInsideTriangle(removed.A.x, removed.A.y, removed.B.x, removed.B.y, removed.C.x, removed.C.y, point.x, point.y) == true) {
+		if (LeftX < 0) {
+			LeftX = 0;
+		}
+		if (RightX >= _SceneDetails.TrianglePointsWidth) {
+			RightX = (_SceneDetails.TrianglePointsWidth - 1);
+		}
 
-				points.Add(removed.A);
-				points.Add(removed.B);
-				points.Add(removed.C);
+		if (Lower < 0) {
+			Lower = 0;
+		}
+		if (Upper >= _SceneDetails.TrianglePointsHeight) {
+			Upper = (_SceneDetails.TrianglePointsHeight - 1);
+		}
 
+		for (int i = LeftX; i <= RightX; i++) {//Size Of The Object
+			for (int j = Lower; j <= Upper; j++) {
 
-				pointMap[(int)((removed.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-				pointMap[(int)((removed.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-				pointMap[(int)((removed.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-				TriangleGroups.Remove(removed);
-
-				for (int i = 0; i < points.Count - 1; i++) {
-					newTriangle = new Triangles {
-						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
-						A = points[i],
-						B = points[i + 1],
-						C = point
-					};
-
-					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
-					TriangleGroups.Add(newTriangle);
+				if (pointMap[i, j].triangleRef.Count > 0) {//Checking If The Point On Map Have A Triangle Attached To It
+					return true;
 				}
+
+			}
+		}
+
+		return false;
+
+	}
+
+	public void ExtendedPointSearch() {
+		//TODO Go Through All Points Around, One Row At A Time. Until A Triangle Is Found. 
+	}
+
+	public void FoundFirstTriangleExtensionSearch() {
+
+		//TODO
+
+	}
+
+
+
+
+	List<Triangles> insideTriangles = new List<Triangles>();
+	List<Vector2> points = new List<Vector2>();
+
+	List<Vector2> DevidedPointsUpperLeft = new List<Vector2>();
+	List<Vector2> DevidedPointsUpperRight = new List<Vector2>();
+	List<Vector2> DevidedPointsLowerRight= new List<Vector2>();
+	List<Vector2> DevidedPointsLowerLeft = new List<Vector2>();
+
+	Vector2 saver;
+	Triangles newTriangle;
+
+	public void CheckIfPointIsInside(Vector2[] point) {
+		insideTriangles.Clear();
+		points.Clear();
+		DevidedPointsUpperLeft.Clear();
+		DevidedPointsUpperRight.Clear();
+		DevidedPointsLowerRight.Clear();
+		DevidedPointsLowerLeft.Clear();
+
+		_s = TriangleGroups.Count;
+		for (int i = 0; i < _s; i++) {
+			removed = TriangleGroups[i];
+
+			if (PointInsideTriangle(removed.A.x, removed.A.y, removed.B.x, removed.B.y, removed.C.x, removed.C.y, point[3].x, point[3].y) == true) {
+
+				insideTriangles.Add(removed);
+
+			}
+		}
+
+		Debug.Log(insideTriangles.Count);
+		points.Clear();
+
+		for(int i = 0; i < insideTriangles.Count; i++) {
+			TriangleGroups.Remove(insideTriangles[i]);
+		}
+
+		_s = insideTriangles.Count;
+		for (int i = 0; i < _s; i++) {
+
+			removed = insideTriangles[0];
+
+			points.Add(removed.A);
+			points.Add(removed.B);
+			points.Add(removed.C);
+
+
+		}
+
+		_s = points.Count;
+		_numerator1 = point[3].x + ((point[1].x - point[3].x) / 2);
+		_numerator2 = point[3].y + ((point[1].y - point[3].y) / 2);
+
+		Debug.Log(points[0] + " | " + points[1] + " | " + points[2] + " | " + _numerator1 + " | " + _numerator2 + " | " + _s);
+		for (int i = 0; i < _s; i++) {
+			saver = points[i];
+
+			if (saver.x <= _numerator1) {
+				if(saver.y < _numerator2) {
+					DevidedPointsLowerLeft.Add(saver);
+				} else {
+					DevidedPointsUpperLeft.Add(saver);
+				}
+			} else {
+				if (saver.y < _numerator2) {
+					DevidedPointsLowerRight.Add(saver);
+				} else {
+					DevidedPointsUpperRight.Add(saver);
+				}
+			}
+
+		}
+
+		Debug.Log(DevidedPointsUpperLeft.Count + " | " + DevidedPointsUpperRight.Count + " | " + DevidedPointsLowerRight.Count + " | " + DevidedPointsLowerLeft.Count);
+
+		Upper = DevidedPointsUpperLeft.Count;
+		if(Upper > 0) {//
+			if(Upper == 1) {//Only One Point In Here.
 				newTriangle = new Triangles {
 					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
-					A = points[0],
-					B = points[points.Count - 1],
-					C = point
+					A = DevidedPointsUpperLeft[0],
+					B = point[0],
+					C = point[1]
 				};
 
 				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
 				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
 				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
 				TriangleGroups.Add(newTriangle);
+
+				if(DevidedPointsUpperRight.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperLeft[0],
+						B = DevidedPointsUpperRight[0],
+						C = point[1]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperLeft[0],
+						B = DevidedPointsLowerRight[0],
+						C = point[1]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+			} else {//Several Points
+
+				for(int i = 0; i < Upper - 1; i++) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperLeft[i],
+						B = DevidedPointsUpperLeft[i + 1],
+						C = point[0]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsUpperLeft[Upper - 1],
+					B = point[0],
+					C = point[1]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsUpperRight.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperLeft[Upper - 1],
+						B = DevidedPointsUpperRight[0],
+						C = point[1]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperLeft[Upper - 1],
+						B = DevidedPointsLowerRight[0],
+						C = point[1]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+
+
 			}
+
+		} else {
+
+			newTriangle = new Triangles {
+				TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+				A = DevidedPointsUpperRight[0],
+				B = point[0],
+				C = point[1]
+			};
+
+			pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			TriangleGroups.Add(newTriangle);
+
 		}
+
+		Upper = DevidedPointsUpperRight.Count;
+		if (Upper > 0) {//
+			if (Upper == 1) {//Only One Point In Here.
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsUpperRight[0],
+					B = point[1],
+					C = point[2]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsLowerRight.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperRight[0],
+						B = DevidedPointsLowerRight[0],
+						C = point[2]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperRight[0],
+						B = DevidedPointsLowerLeft[0],
+						C = point[2]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+			} else {//Several Points
+
+				for (int i = 0; i < Upper - 1; i++) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperRight[i],
+						B = DevidedPointsUpperRight[i + 1],
+						C = point[1]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsUpperRight[Upper - 1],
+					B = point[1],
+					C = point[2]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsLowerRight.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperRight[Upper - 1],
+						B = DevidedPointsLowerRight[0],
+						C = point[2]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsUpperRight[Upper - 1],
+						B = DevidedPointsLowerLeft[0],
+						C = point[2]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+
+
+			}
+
+		} else {
+
+			newTriangle = new Triangles {
+				TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+				A = DevidedPointsLowerRight[0],
+				B = point[1],
+				C = point[2]
+			};
+
+			pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			TriangleGroups.Add(newTriangle);
+
+		}
+
+		Upper = DevidedPointsLowerRight.Count;
+		if (Upper > 0) {//
+			if (Upper == 1) {//Only One Point In Here.
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsLowerRight[0],
+					B = point[2],
+					C = point[3]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsLowerLeft.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerRight[0],
+						B = DevidedPointsLowerLeft[0],
+						C = point[3]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerRight[0],
+						B = DevidedPointsUpperLeft[0],
+						C = point[3]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+			} else {//Several Points
+
+				for (int i = 0; i < Upper - 1; i++) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerRight[i],
+						B = DevidedPointsLowerRight[i + 1],
+						C = point[2]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsLowerRight[Upper - 1],
+					B = point[2],
+					C = point[3]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsLowerLeft.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerRight[Upper - 1],
+						B = DevidedPointsLowerLeft[0],
+						C = point[3]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerRight[Upper - 1],
+						B = DevidedPointsUpperLeft[0],
+						C = point[3]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+
+
+			}
+
+		} else {
+
+			newTriangle = new Triangles {
+				TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+				A = DevidedPointsLowerLeft[0],
+				B = point[2],
+				C = point[3]
+			};
+
+			pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			TriangleGroups.Add(newTriangle);
+
+		}
+
+		Upper = DevidedPointsLowerLeft.Count;
+		if (Upper > 0) {//
+			if (Upper == 1) {//Only One Point In Here.
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsLowerLeft[0],
+					B = point[3],
+					C = point[0]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsUpperLeft.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerLeft[0],
+						B = DevidedPointsUpperLeft[0],
+						C = point[0]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerLeft[0],
+						B = DevidedPointsUpperRight[0],
+						C = point[0]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+			} else {//Several Points
+
+				for (int i = 0; i < Upper - 1; i++) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerLeft[i],
+						B = DevidedPointsLowerLeft[i + 1],
+						C = point[3]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+				newTriangle = new Triangles {
+					TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+					A = DevidedPointsLowerLeft[Upper - 1],
+					B = point[3],
+					C = point[0]
+				};
+
+				pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+				TriangleGroups.Add(newTriangle);
+
+				if (DevidedPointsUpperLeft.Count > 0) {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerLeft[Upper - 1],
+						B = DevidedPointsUpperLeft[0],
+						C = point[0]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				} else {
+
+					newTriangle = new Triangles {
+						TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+						A = DevidedPointsLowerLeft[Upper - 1],
+						B = DevidedPointsUpperRight[0],
+						C = point[0]
+					};
+
+					pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+					TriangleGroups.Add(newTriangle);
+
+				}
+
+
+
+			}
+
+		} else {
+
+			newTriangle = new Triangles {
+				TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+				A = DevidedPointsUpperLeft[0],
+				B = point[3],
+				C = point[0]
+			};
+
+			pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+			TriangleGroups.Add(newTriangle);
+
+		}
+
+
+
+
+
+		//If One Of The Objects Points Are On The Edge Line. That Triangle Should Dissapair. if two object points are on the line, then lets say top of the object is overlapping a horizontal line.
+		// * This Problem Only Occur When A Point Is On The Edge Where The Triangle Have No Neighbour Triangle
+
+		// * big triangle A-B-C Where Object (D-E) Is Between A-B On A Horizontla Line. Then The New Triangle A-D-E And A-D-B Should Be Removed.
+		// * big triangle A-B-C Where Object (F) Is Between B-C On A Sloped Line. Then Triangle B-F-C Should Be Removed.
+
+		// * If Upper Left Count == 1 && Upper Right Count == 1. Check If Object Points Are On The Same Hight As The Two Highest Points.
+		// * If Upper Right Count == 1 && Lower Right Count == 0 && Lower Left Count == 1. Check If Object Lower Right Point Is On The Line Between UpperRight And LowerLeft Most Down(last upper point)/Right (first Lower Left Point)
+		// * Then Copy Paste For Other Angles. 8 checks total. (Might Need To Check Against All End Lines. -_-)
+
+
+
+
+
+
+
+		//find all triangles i intersect/collide/overlap with.
+		//then those triangles are going to be disolved and only the pure points are left.
+
+		//then next step is to pair together the old points with the new points.
+		//this can be done two ways:
+		//1. go through all old points and see which new points is the closest
+		//2. do a cicular scan and when two old points are found, connect those and the point that im scanning from.
+
+
+
+
+
+
+
+
+		/*		startpoint = TriangleGroups.Count - 1;
+
+				for (int j = startpoint; j >= 0; j--) {
+
+					points.Clear();
+					removed = TriangleGroups[j];
+
+					if (PointInsideTriangle(removed.A.x, removed.A.y, removed.B.x, removed.B.y, removed.C.x, removed.C.y, point.x, point.y) == true) {
+
+						points.Add(removed.A);
+						points.Add(removed.B);
+						points.Add(removed.C);
+
+
+						pointMap[(int)((removed.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						pointMap[(int)((removed.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						pointMap[(int)((removed.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((removed.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Remove(removed);//Removing A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						TriangleGroups.Remove(removed);
+
+						for (int i = 0; i < points.Count - 1; i++) {
+							newTriangle = new Triangles {
+								TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+								A = points[i],
+								B = points[i + 1],
+								C = point
+							};
+
+							pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+							pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+							pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+							TriangleGroups.Add(newTriangle);
+						}
+						newTriangle = new Triangles {
+							TriangleColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)),
+							A = points[0],
+							B = points[points.Count - 1],
+							C = point
+						};
+
+						pointMap[(int)((newTriangle.A.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.A.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						pointMap[(int)((newTriangle.B.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.B.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						pointMap[(int)((newTriangle.C.x - _SceneDetails.TrianglePointsStartXPoint) / _SceneDetails.TrianglePointsDistance), (int)((newTriangle.C.y - _SceneDetails.TrianglePointsStartYPoint) / _SceneDetails.TrianglePointsDistance)].triangleRef.Add(newTriangle);//Setting A Refrense Of This Triangle In Each CornerPoint Of The Triangle
+						TriangleGroups.Add(newTriangle);
+					}
+				}*/
 
 	}
 
@@ -653,6 +1355,7 @@ public class Triangles {
 	public Vector2 B;
 	public Vector2 C;
 
+	//Neighbours
 	public Triangles AB;
 	public Triangles AC;
 	public Triangles BC;
