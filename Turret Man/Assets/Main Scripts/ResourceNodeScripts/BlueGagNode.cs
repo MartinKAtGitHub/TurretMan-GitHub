@@ -15,7 +15,10 @@ public class BlueGagNode : ResourceNode {
 	// Update is called once per frame
 	void Update ()
     {
-	
+	    if(CurrentResourceAmount == 0)
+        {
+            NodeDepleted();
+        }
 	}
 
     public override int MineResource(int miningPower)

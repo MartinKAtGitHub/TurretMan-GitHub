@@ -5,18 +5,21 @@ using UnityEngine;
 //[ExecuteInEditMode]
 public class BlueGagsSpawner : ResourceNodeSpawner {
 
-    public static List<GameObject> SpawnPoints = new List<GameObject>();
-    //list of BlueGagSpawnPoint Transforms
+    //public static List<GameObject> SpawnPoints = new List<GameObject>();
    
-    // Use this for initialization
+
+
+    public float seconds;
+    public Vector2 MinMaxGagLimits;
+
+    private BlueGagNode blueGagNodePrefab;
+
     void Start ()
     {
-        
+        blueGagNodePrefab = ResourceNodeToSpawnPrefab.GetComponent<BlueGagNode>();
+        blueGagNodePrefab.Spawner = this; //Maybe crate Init Method --> also this is connected to prefab Mayeb do this afther instantiate and conect to clone
 
-      /*  for (int i = 0; i < SpawnPoints.Count; i++)
-        {
-            Debug.Log( " TRANS | "+ SpawnPoints[i].transform.position); 
-        }*/
+        InvokeRepeating("SpawnBlueGag", 0, seconds);
 	}
 	
 	// Update is called once per frame
@@ -27,7 +30,71 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
 
     void SpawnBlueGag()
     {
-        // if(counter < min(5))
-            // insta ()
+        Debug.Log("Checking blueGag Nodes and SPAWNING");
+        if(GagsOnMapCounter <= MinMaxGagLimits.x)
+        {
+            //SpawnNewBlueGagNodeRecoursive();
+            SpawnNewBlueGagNode();
+        }
+        /*  else if(GagsOnMapCounter >= MinMaxGagLimits.y)
+          {
+              Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " > " + MinMaxGagLimits.y + " BREAK");
+
+              return;
+          }*/
     }
+
+
+    private void SpawnNewBlueGagNode()
+    {
+        Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " < " + MinMaxGagLimits.x + " Spawning more");
+
+        if(SpawnPoints.Count != 0)
+        {
+            var ranIndex = Random.Range(0, SpawnPoints.Count);
+      
+            var node = Instantiate(blueGagNodePrefab, SpawnPoints[ranIndex].gameObject.transform.position , Quaternion.identity);
+            // RemoveOccipiedSpawnPoint(ranIndex);
+
+            SpawnPointstOccupied.Add(SpawnPoints[ranIndex]);
+            node.SpawnPoint = SpawnPoints[ranIndex];
+            SpawnPoints.Remove(SpawnPoints[ranIndex]);
+
+            GagsOnMapCounter++;
+        }
+        else
+        {
+            Debug.LogError("NO avaliable spawnLocations for = " + this.GetType());
+        }
+
+       
+    }
+    
+    private void SpawnNewBlueGagNodeRecoursive()
+    {
+        Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " < " + MinMaxGagLimits.x + " Spawning more");
+        var spawnPoint = SpawnPoints[Random.Range(0, SpawnPoints.Count)];
+        if (!spawnPoint.SpawnPointOccupied)
+        {
+            // Rmoveit And Add it to other list
+            Instantiate(blueGagNodePrefab, spawnPoint.gameObject.transform);
+            spawnPoint.SpawnPointOccupied = true;
+            GagsOnMapCounter++;
+        }
+        else
+        {
+            Debug.LogWarning("BlueGAG SpawnPoint Occupied = " + spawnPoint.SpawnPointOccupied + "Roll Again");
+            for (int i = 0; i < SpawnPoints.Count; i++)
+            {
+                if(!SpawnPoints[i].SpawnPointOccupied)
+                {
+                    // SpawnNewBlueGagNodeRecoursive(); // maybe cause infinit loop AND Performance hits
+                    break;
+                }
+            }
+            Debug.LogError("Not Enough BlueGags SpawnPoints");
+        }
+    }
+
+   
 }
