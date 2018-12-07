@@ -5,14 +5,13 @@ using UnityEngine;
 //[ExecuteInEditMode]
 public class BlueGagsSpawner : ResourceNodeSpawner {
 
-    //public static List<GameObject> SpawnPoints = new List<GameObject>();
-   
-
-
-    public float seconds;
-    public Vector2 MinMaxGagLimits;
-
     private BlueGagNode blueGagNodePrefab;
+
+    private void Awake()
+    {
+        // GameManager.Instance.BlueGagsSpawner = this;
+        GetAllBlueGagSpawnPoints();
+    }
 
     void Start ()
     {
@@ -21,12 +20,7 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
 
         InvokeRepeating("SpawnBlueGag", 0, seconds);
 	}
-	
-	// Update is called once per frame
-	void Update ()
-    {
-		// Timer
-	}
+    
 
     void SpawnBlueGag()
     {
@@ -44,7 +38,6 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
           }*/
     }
 
-
     private void SpawnNewBlueGagNode()
     {
         Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " < " + MinMaxGagLimits.x + " Spawning more");
@@ -54,7 +47,6 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
             var ranIndex = Random.Range(0, SpawnPoints.Count);
       
             var node = Instantiate(blueGagNodePrefab, SpawnPoints[ranIndex].gameObject.transform.position , Quaternion.identity);
-            // RemoveOccipiedSpawnPoint(ranIndex);
 
             SpawnPointstOccupied.Add(SpawnPoints[ranIndex]);
             node.SpawnPoint = SpawnPoints[ranIndex];
@@ -66,8 +58,6 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
         {
             Debug.LogError("NO avaliable spawnLocations for = " + this.GetType());
         }
-
-       
     }
     
     private void SpawnNewBlueGagNodeRecoursive()
@@ -97,4 +87,11 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
     }
 
    
+    private void GetAllBlueGagSpawnPoints()
+    {
+        //if(blue)
+        SpawnPoints.AddRange(GetComponentsInChildren<BlueGagSpawnPoint>());
+        //if(green)
+        //SpawnPoints.AddRange(GetComponentsInChildren<GreemGagsSpawnPoint>());
+    }
 }

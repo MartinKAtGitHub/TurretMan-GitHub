@@ -5,12 +5,12 @@ using UnityEngine;
 public abstract class ResourceNodeSpawner : MonoBehaviour {
 
     public GameObject ResourceNodeToSpawnPrefab;
-
-    public int GagsOnMapCounter;
-
+   [HideInInspector] public int GagsOnMapCounter;
+    public float seconds;
+    public Vector2 MinMaxGagLimits;
 
     //TODO Update List to take any Spawnpoint not only BlueGags
-    public static List<BlueGagSpawnPoint> SpawnPoints = new List<BlueGagSpawnPoint>();
+    public  List<BlueGagSpawnPoint> SpawnPoints = new List<BlueGagSpawnPoint>();
     public List<BlueGagSpawnPoint> SpawnPointstOccupied = new List<BlueGagSpawnPoint>();
    
     

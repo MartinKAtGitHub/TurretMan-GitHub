@@ -40,7 +40,7 @@ public abstract class ResourceNode : MonoBehaviour
         // BreakDownAnim
         // Event
         Spawner.SpawnPointstOccupied.Remove(SpawnPoint);
-        ResourceNodeSpawner.SpawnPoints.Add(SpawnPoint);
+        Spawner.SpawnPoints.Add(SpawnPoint);
 
         //SpawnPoint = null;
 

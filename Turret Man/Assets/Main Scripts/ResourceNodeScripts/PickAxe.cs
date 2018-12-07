@@ -20,6 +20,12 @@ public class PickAxe : MonoBehaviour {
     //target BlueGag
 
     // Input manager --> if LMB && anim end(Use anim event OR anim clip lengt) --> execite anim
+    PlayerResources playerResources;
+
+    private void Awake()
+    {
+        playerResources = GetComponentInParent<PlayerResources>();
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -27,7 +33,7 @@ public class PickAxe : MonoBehaviour {
 
         if(collision.tag == "BlueGag") // TODO This needs to be changes to somthing less hard coded --> maybe check the layer insted? OR Add targets for pickaxe to check against
         {
-            MYGAGS += collision.GetComponent<ResourceNode>().MineResource(PickAxePowerLevel);
+            playerResources.CurrentResources += collision.GetComponent<ResourceNode>().MineResource(PickAxePowerLevel);
         }
     }
     
