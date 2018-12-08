@@ -376,9 +376,10 @@ Transform:
   m_LocalPosition: {x: 16.24, y: -34.24, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1273050278}
   - {fileID: 1607491176}
   - {fileID: 603305722}
+  - {fileID: 1273050278}
+  - {fileID: 1178172166}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -64459,7 +64460,7 @@ Transform:
   m_Children:
   - {fileID: 95506266}
   m_Father: {fileID: 394787794}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &621767783
 GameObject:
@@ -64475,6 +64476,7 @@ GameObject:
   - component: {fileID: 621767787}
   - component: {fileID: 621767786}
   - component: {fileID: 621767788}
+  - component: {fileID: 621767789}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -64565,6 +64567,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentResources: 0
+--- !u!114 &621767789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 621767783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb0108eaf4a3174498b678d015767c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryItems: []
+  selectedInventoryItem: {fileID: 0}
 --- !u!1001 &691364288
 Prefab:
   m_ObjectHideFlags: 0
@@ -65609,6 +65624,77 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1178172165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1178172166}
+  - component: {fileID: 1178172167}
+  - component: {fileID: 1178172168}
+  m_Layer: 0
+  m_Name: MiningMachineSpawnerTool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1178172166
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1178172165}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 394787794}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1178172167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1178172165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ad2c0cdcccd4034ba15ef6293bfbe4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemSpamKeyLock: 0
+  inputKeyPadID: 2
+  itemName: MinignMachineSpawner
+  miningMachinePrefab: {fileID: 1907801925}
+  MachinePositionOffset: {x: 0, y: 2, z: 0}
+--- !u!61 &1178172168
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1178172165}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &1273050277
 GameObject:
   m_ObjectHideFlags: 0
@@ -65620,7 +65706,7 @@ GameObject:
   - component: {fileID: 1273050280}
   - component: {fileID: 1273050279}
   m_Layer: 0
-  m_Name: PickAxeCollider
+  m_Name: PickAxe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65637,7 +65723,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 394787794}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1273050279
 MonoBehaviour:
@@ -65650,7 +65736,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de8ead959c735d40ba3a79e1479000a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MYGAGS: 0
+  itemSpamKeyLock: 0
+  inputKeyPadID: 3
+  itemName: PickAxe
   PickAxePowerLevel: 2
 --- !u!61 &1273050280
 BoxCollider2D:
@@ -67237,7 +67325,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 394787794}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1620580696
 GameObject:
@@ -67496,6 +67584,34 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4988255521064752, guid: 2e6f222408e6269428565e5d0c4652d8,
     type: 2}
   m_PrefabInternal: {fileID: 1811158607}
+--- !u!1 &1907801925
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1907801926}
+  m_Layer: 0
+  m_Name: MiningMachine
+  m_TagString: Untagged
+  m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1907801926
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1907801925}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 24.280045, y: -34.93448, z: -0.109375}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2143906545
 Prefab:
   m_ObjectHideFlags: 0

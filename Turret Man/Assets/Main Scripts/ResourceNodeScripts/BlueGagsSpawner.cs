@@ -24,7 +24,7 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
 
     void SpawnBlueGag()
     {
-        Debug.Log("Checking blueGag Nodes and SPAWNING");
+       // Debug.Log("Checking blueGag Nodes and SPAWNING");
         if(GagsOnMapCounter <= MinMaxGagLimits.x)
         {
             //SpawnNewBlueGagNodeRecoursive();
@@ -40,7 +40,7 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
 
     private void SpawnNewBlueGagNode()
     {
-        Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " < " + MinMaxGagLimits.x + " Spawning more");
+        //Debug.Log("Blue Gags (" + GagsOnMapCounter + ")" + " < " + MinMaxGagLimits.x + " Spawning more");
 
         if(SpawnPoints.Count != 0)
         {

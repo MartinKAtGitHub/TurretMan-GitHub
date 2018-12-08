@@ -1,17 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-public class PickAxe : MonoBehaviour {
+public class PickAxe : InventoryItem {
 
-
-    public int MYGAGS;
-
+  
+    [Space(10)]
     /// <summary>
     /// PowerLevel determines how many resources are gathered per mining action
     /// </summary>
     public int PickAxePowerLevel;
-
+  
     // PlayerResouceManager
 
 
@@ -21,10 +21,22 @@ public class PickAxe : MonoBehaviour {
 
     // Input manager --> if LMB && anim end(Use anim event OR anim clip lengt) --> execite anim
     PlayerResources playerResources;
+    Animator playerAnimator;
+
+
 
     private void Awake()
     {
         playerResources = GetComponentInParent<PlayerResources>();
+        playerAnimator = GetComponentInParent<Animator>();
+    }
+    
+    
+    public override void Action()
+    {
+        Debug.Log("Action Using =" + ItemName);
+        playerAnimator.SetTrigger("UsePickAxe");
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -36,5 +48,6 @@ public class PickAxe : MonoBehaviour {
             playerResources.CurrentResources += collision.GetComponent<ResourceNode>().MineResource(PickAxePowerLevel);
         }
     }
-    
+
+   
 }
