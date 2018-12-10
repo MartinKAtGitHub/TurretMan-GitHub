@@ -24,7 +24,7 @@ public abstract class ResourceNode : MonoBehaviour
 
    protected void Start()
     {
-        Debug.Log("ResourceNode Start()");
+       // Debug.Log("ResourceNode Start()");
 
         CurrentResourceAmount = maxResourceAmount;
     }

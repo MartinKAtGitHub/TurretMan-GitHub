@@ -11,7 +11,8 @@ public class PlayerInventory : MonoBehaviour {
 
 	void Start ()
     {
-        inventoryItems.AddRange( GetComponentsInChildren<InventoryItem>() );
+        // inventoryItems.AddRange( GetComponentsInChildren<InventoryItem>() );
+         inventoryItems.AddRange( GetComponents<InventoryItem>() );
         PairInventoryItemsToInputKeys();
     }
 	
@@ -50,7 +51,16 @@ public class PlayerInventory : MonoBehaviour {
   
     private void SetInventoryItemToSlected(InventoryItem item)
     {
-        selectedInventoryItem = item;
+        if(selectedInventoryItem == item)
+        {
+            GetSelectedInventoryItemAction();
+        }
+        else
+        {
+            selectedInventoryItem = item;
+        }
+
+        //selectedInventoryItem = item;
     }
 
     private void GetSelectedInventoryItemAction()

@@ -56,7 +56,7 @@ public class BlueGagsSpawner : ResourceNodeSpawner {
         }
         else
         {
-            Debug.LogError("NO avaliable spawnLocations for = " + this.GetType());
+            Debug.LogWarning("NO avaliable spawnLocations for = " + this.GetType());
         }
     }
     

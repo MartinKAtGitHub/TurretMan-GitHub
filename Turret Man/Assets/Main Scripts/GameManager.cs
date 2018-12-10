@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-   // public BlueGagsSpawner BlueGagsSpawner;
+    [HideInInspector]public PlayerResources PlayerResources;
 
     public static GameManager Instance = null;              //Static instance of GameManager which allows it to be accessed by any other script.
    
@@ -26,7 +26,8 @@ public class GameManager : MonoBehaviour {
 
         //Sets this to not be destroyed when reloading scene
         DontDestroyOnLoad(gameObject);
-       
+
+        PlayerResources = GetComponent<PlayerResources>();
     }
 
     //Update is called every frame.

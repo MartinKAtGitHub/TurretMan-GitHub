@@ -20,7 +20,11 @@ public class BlueGagNode : ResourceNode {
             NodeDepleted();
         }
 	}
-
+    /// <summary>
+    /// Use this method to extract resources from a node, The method caclulates and Handels when the node is Empty.
+    /// </summary>
+    /// <param name="miningPower"> How meny resources per tick is exctracted </param>
+    /// <returns>The amount of resources exctracted from this node </returns>
     public override int MineResource(int miningPower)
     {
         //DO we want check to retunr; if the Node has 0 resources--> use full if we want to trigger anim or somthign els

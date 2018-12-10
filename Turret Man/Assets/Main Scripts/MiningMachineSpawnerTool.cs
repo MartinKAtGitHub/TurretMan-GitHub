@@ -9,41 +9,43 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
 
     private bool inRangeOfGagNode;
     private GameObject GagNode;
-    // Use this for initialization
-    void Start ()
-    {
-		
-	}
-	
-	// Update is called once per frame
-	void Update ()
-    {
-		
-	}
+    private BlueGagNode node;
 
+    private Animator playerAnimator;
 
+    private void Awake()
+    {
+        playerAnimator = GetComponent<Animator>();          
+    }
+    
     public override void Action()
     {
-        SpawnMiningMachine();
+        if(inRangeOfGagNode)
+        {
+            playerAnimator.SetTrigger("Build");
+        }
+        else
+        {
+            Debug.Log("Not in Range of GagNode to create Mining Machine");
+        }
+        //SpawnMiningMachine();
     }
 
     private void SpawnMiningMachine()
     {
-        Debug.Log("SPAWING MACHINE ACTION");
-
         if (GagNode != null)
         {
 
-            var nodeOcciped =  GagNode.GetComponent<BlueGagNode>().HasMiningMachine;
-            if (inRangeOfGagNode && !nodeOcciped)
+            node =  GagNode.GetComponent<BlueGagNode>();
+            if (!node.HasMiningMachine)
             {
-                    nodeOcciped = true;
+                    node.HasMiningMachine = true;
                     var machineClone = Instantiate(miningMachinePrefab, GagNode.transform);
-                    machineClone.transform.position = new Vector3(0,0,0) + MachinePositionOffset; // Dosent Work need to reset
+                    machineClone.transform.position = GagNode.transform.position + MachinePositionOffset;
             }
             else
             {
-                Debug.LogWarning("InRangeofNode(" + inRangeOfGagNode + ") Node Has Machine(" + nodeOcciped + ") --> Make UI to tell Player" );
+                Debug.LogWarning("InRangeofNode(" + inRangeOfGagNode + ") Node Has Machine(" + node.HasMiningMachine + ") --> Make UI to tell Player" );
             }
         }
         else
