@@ -18,14 +18,12 @@ public abstract class ResourceNode : MonoBehaviour
     /// </summary>
     public int CurrentResourceAmount;
 
-    public ResourceNodeSpawner Spawner;
-    public BlueGagSpawnPoint SpawnPoint;
+   [HideInInspector] public ResourceNodeSpawner Spawner;
+   [HideInInspector] public BlueGagSpawnPoint SpawnPoint;
 
 
    protected void Start()
     {
-       // Debug.Log("ResourceNode Start()");
-
         CurrentResourceAmount = maxResourceAmount;
     }
 
@@ -43,13 +41,8 @@ public abstract class ResourceNode : MonoBehaviour
         Spawner.SpawnPoints.Add(SpawnPoint);
 
         //SpawnPoint = null;
-
-
+        
         Spawner.GagsOnMapCounter --;
         Destroy(gameObject);
     }
-
-    //SpawnNode
-
-    // Collider inRange
 }

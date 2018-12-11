@@ -100,6 +100,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ef32979e4d801645a43c3be28b380c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxHP: 0
+  CurrentHP: 0
+  Cost: 5
   MiningMachinePower: 1
   miningRateInSec: 5
 --- !u!212 &212572161411476402

@@ -13,20 +13,40 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
 
     private Animator playerAnimator;
 
+    private int cost;  
+
     private void Awake()
     {
-        playerAnimator = GetComponent<Animator>();          
+        playerAnimator = GetComponent<Animator>();
+
+        cost = miningMachinePrefab.GetComponent<MiningMachine>().Cost;
     }
     
+
+    private bool CanPlayerPayForMachine()
+    {
+        //return GameManager.Instance.PlayerResources.CurrentResources >= cost;
+
+        if (GameManager.Instance.PlayerResources.CurrentResources >= cost)
+        { 
+            return true;
+        }
+        else
+        {
+            Debug.Log("Player can NOT pay for " + miningMachinePrefab.name);
+            return false;
+        }
+    }
+
     public override void Action()
     {
-        if(inRangeOfGagNode)
+        if(inRangeOfGagNode && CanPlayerPayForMachine())
         {
             playerAnimator.SetTrigger("Build");
         }
         else
         {
-            Debug.Log("Not in Range of GagNode to create Mining Machine");
+            Debug.Log(" Is Player within range (" + inRangeOfGagNode + ") " + "Can player Pay for Machine(" + CanPlayerPayForMachine() + ") ");
         }
         //SpawnMiningMachine();
     }
@@ -35,13 +55,14 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
     {
         if (GagNode != null)
         {
-
             node =  GagNode.GetComponent<BlueGagNode>();
             if (!node.HasMiningMachine)
             {
-                    node.HasMiningMachine = true;
-                    var machineClone = Instantiate(miningMachinePrefab, GagNode.transform);
-                    machineClone.transform.position = GagNode.transform.position + MachinePositionOffset;
+                node.HasMiningMachine = true;
+                var machineClone = Instantiate(miningMachinePrefab, GagNode.transform);
+                machineClone.transform.position = GagNode.transform.position + MachinePositionOffset;
+
+                GameManager.Instance.PlayerResources.CurrentResources -= cost;
             }
             else
             {
@@ -66,6 +87,7 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
             GagNode = collision.gameObject;
         }
     }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         //Debug.Log("PickAxe ENTER -> " + collision.name);

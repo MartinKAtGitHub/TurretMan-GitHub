@@ -99,6 +99,10 @@ public class CharacterMovement : MonoBehaviour
     public void Flip() // TODO update Flip() Method to use the sprite flip insted of scale *-1
     {
         facingRigth = !facingRigth;
+      //  Vector3 theScale = transform.localScale;
+      //  theScale.x *= -1;
+      //  transform.localScale = theScale;
+
         Vector3 theScale = CharacterGraphics.localScale;
         theScale.x *= -1;
         CharacterGraphics.localScale = theScale;

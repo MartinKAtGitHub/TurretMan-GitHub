@@ -36,7 +36,7 @@ public class PlayerInventory : MonoBehaviour {
       
         }
 
-        if( (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.KeypadEnter))  /* && inventoryKeyLoock == false */)
+        if( (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Return))  /* && inventoryKeyLoock == false */)
         {
             GetSelectedInventoryItemAction();
         }
