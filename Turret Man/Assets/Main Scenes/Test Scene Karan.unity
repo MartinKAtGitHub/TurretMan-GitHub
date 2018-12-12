@@ -397,7 +397,7 @@ GameObject:
   - component: {fileID: 305312693}
   - component: {fileID: 305312694}
   m_Layer: 0
-  m_Name: Basic Turret
+  m_Name: Basic Turret_Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -414,7 +414,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1921534694}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &305312694
 SpriteRenderer:
@@ -470,7 +470,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 621767783}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 40, y: -37.374, z: 0}
+  m_LocalPosition: {x: 39.531, y: -37.397, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1607491176}
@@ -489,9 +489,8 @@ GameObject:
   m_Component:
   - component: {fileID: 481957657}
   - component: {fileID: 481957658}
-  - component: {fileID: 481957659}
   m_Layer: 0
-  m_Name: BasicTurret_Gun
+  m_Name: BasicTurret_GunBarrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -503,13 +502,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 481957656}
-  m_LocalRotation: {x: -0, y: -0, z: -0.20465432, w: 0.97883433}
-  m_LocalPosition: {x: 39.165, y: -36.648003, z: -0.0005406148}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.099998474, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -23.619001}
+  m_Father: {fileID: 1921534694}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &481957658
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -544,7 +543,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2132679537
   m_SortingLayer: 2
-  m_SortingOrder: 18
+  m_SortingOrder: 50
   m_Sprite: {fileID: 21300000, guid: aed136d598a988d409ee7787941f6fa6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -556,22 +555,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &481957659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 481957656}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a86bf19ca272f2e48a95ce31ec09a0b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 621767783}
-  Range: 0
-  TurretRotationSpeed: 1000
-  Dmg: 0
-  RateOfFire: 0
 --- !u!1 &524493806
 GameObject:
   m_ObjectHideFlags: 0
@@ -64925,6 +64908,29 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4988255521064752, guid: 2e6f222408e6269428565e5d0c4652d8,
     type: 2}
   m_PrefabInternal: {fileID: 691364288}
+--- !u!1 &708490342 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1168373862899990, guid: 6228f636a5a9ae742962460cfe0c72ce,
+    type: 2}
+  m_PrefabInternal: {fileID: 2143906545}
+--- !u!95 &708490348
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 708490342}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 242c677170e168245856278338433460, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &752667554
 GameObject:
   m_ObjectHideFlags: 0
@@ -67624,6 +67630,60 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1629634849
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1629634851}
+  - component: {fileID: 1629634850}
+  m_Layer: 0
+  m_Name: EnemyTarget
+  m_TagString: Enemy
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!61 &1629634850
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1629634849}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.5, y: 0.5}
+  m_EdgeRadius: 0
+--- !u!4 &1629634851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1629634849}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 31.68, y: -36.66, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1632187883
 GameObject:
   m_ObjectHideFlags: 0
@@ -67815,6 +67875,8 @@ GameObject:
   - component: {fileID: 1921534694}
   - component: {fileID: 1921534693}
   - component: {fileID: 1921534692}
+  - component: {fileID: 1921534695}
+  - component: {fileID: 1921534696}
   m_Layer: 0
   m_Name: Basic Gun Turret
   m_TagString: Untagged
@@ -67822,22 +67884,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1921534692
-MonoBehaviour:
+--- !u!58 &1921534692
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1921534691}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a86bf19ca272f2e48a95ce31ec09a0b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 621767783}
-  Range: 0
-  TurretRotationSpeed: 0
-  Dmg: 0
-  RateOfFire: 0
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 5
 --- !u!61 &1921534693
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -67870,13 +67931,54 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1921534691}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 39.165, y: -36.748, z: -0.0005406148}
+  m_LocalPosition: {x: 27.47, y: -36.748, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 481957657}
   - {fileID: 305312693}
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1921534695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1921534691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a86bf19ca272f2e48a95ce31ec09a0b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnemyTag: Enemy
+  GunBarrel: {fileID: 481957656}
+  Bullet: {fileID: 1342767532814120, guid: a106ed1f6484a4a46871479437af4a0b, type: 2}
+  bulletSpeed: 5
+  DetectionRange: 5
+  Dmg: 1
+  ShootEvery: 3
+  targets: []
+  primaryTarget: {fileID: 0}
+--- !u!50 &1921534696
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1921534691}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1001 &2143906545
 Prefab:
   m_ObjectHideFlags: 0
@@ -67926,6 +68028,12 @@ Prefab:
       propertyPath: resourceRarityModifier
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 212759190108752018, guid: 6228f636a5a9ae742962460cfe0c72ce,
+        type: 2}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 73f16185e38669845b0e76d9ffab4f84,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6228f636a5a9ae742962460cfe0c72ce, type: 2}
   m_IsPrefabAsset: 0

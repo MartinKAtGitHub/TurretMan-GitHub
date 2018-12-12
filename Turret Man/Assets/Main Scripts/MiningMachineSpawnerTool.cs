@@ -40,13 +40,15 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
 
     public override void Action()
     {
-        if(inRangeOfGagNode && CanPlayerPayForMachine())
+        if(inRangeOfGagNode && CanPlayerPayForMachine() && !node.HasMiningMachine)
         {
             playerAnimator.SetTrigger("Build");
         }
         else
         {
-            Debug.Log(" Is Player within range (" + inRangeOfGagNode + ") " + "Can player Pay for Machine(" + CanPlayerPayForMachine() + ") ");
+            Debug.Log(" Is Player within range (" + inRangeOfGagNode + ") " +
+                "Can player Pay for Machine(" + CanPlayerPayForMachine() + ") " + 
+                " Node Has miningMachine (" + node.HasMiningMachine + ") ");
         }
         //SpawnMiningMachine();
     }
@@ -55,7 +57,7 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
     {
         if (GagNode != null)
         {
-            node =  GagNode.GetComponent<BlueGagNode>();
+           
             if (!node.HasMiningMachine)
             {
                 node.HasMiningMachine = true;
@@ -85,6 +87,7 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
             Debug.Log("Inrage of GagNode !!!!!!!!!!");
             inRangeOfGagNode = true;
             GagNode = collision.gameObject;
+            node = GagNode.GetComponent<BlueGagNode>();
         }
     }
 
@@ -96,6 +99,7 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
         {
             inRangeOfGagNode = false;
             GagNode = null;
+            node = null;
         }
     }
 }

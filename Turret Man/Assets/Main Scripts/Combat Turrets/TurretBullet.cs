@@ -8,17 +8,49 @@ public class TurretBullet : MonoBehaviour {
     /// How far the bullet can go before self distruction;
     /// </summary>
     public float MaxBulletTravelDistance;
+    public GameObject Target;
 
     private int dmg;
     private float bulletSpeed;
 
+    Vector3 bulletDirection;
+
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
 		
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		
+	void Update ()
+    {
+        transform.position += bulletDirection * (bulletSpeed * Time.deltaTime);
 	}
+
+    public void FireProjectile(GameObject launcher, GameObject target, int damage, float bulletSpeed)
+    {
+        if (launcher && target)
+        {
+            bulletDirection = (target.transform.position - launcher.transform.position).normalized;
+            //  m_fired = true;
+            //  m_launcher = launcher;
+            Target = target;
+            dmg = damage;
+            this.bulletSpeed = bulletSpeed;
+             Destroy(gameObject, 10.0f);
+        }
+    }
+
+     void OnCollisionEnter2D(Collision2D other)
+     {
+        if (other.gameObject == Target)
+        {
+            Debug.Log("Target Hit");
+        }
+
+        if (other.gameObject.GetComponent<TurretBullet>() == null)
+        {
+            Destroy(gameObject);
+        }
+    }
 }

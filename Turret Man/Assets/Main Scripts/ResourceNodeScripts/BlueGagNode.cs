@@ -53,4 +53,6 @@ public class BlueGagNode : ResourceNode {
         return diff;
     }
 
+
+
 }
