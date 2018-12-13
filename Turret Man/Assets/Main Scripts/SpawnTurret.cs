@@ -9,44 +9,42 @@ public class SpawnTurret : MonoBehaviour {
     public float offset;
    [SerializeField] Camera cam;
 
+	public bool ShowTestBox = true;
     [SerializeField]GameObject GhostBox;
 	// Use this for initialization
 	void Start ()
     {
         cam = Camera.main;
+
+		if(ShowTestBox == true) {
+			GhostBox.SetActive(true);
+		} else {
+			GhostBox.SetActive(false);
+		}
+
+
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-        GhostBoxCalc();
+		if(ShowTestBox == true) {
+			GhostBoxCalc();
+		}
 
         if (Input.GetMouseButtonUp(0))
         {
-            var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
+			var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
+
+			var playerX = Mathf.Floor((transform.position.x) / 0.5f) * 0.5f;//Player Snapped Node Position X
+			var playerY = Mathf.Floor((transform.position.y - offset) / 0.5f) * 0.5f;//Player Snapped Node Position Y (- offset) 
 
 
-           // var test = (mousPos - transform.position).normalized;
-            
-           // Debug.Log(test *= 0.5f);
+			var x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 0.5f, playerX + 0.5f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+			var y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 0.5f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
 
-
-           var x = Mathf.Clamp(mousPos.x, Mathf.Round(transform.position.x / 0.5f ) * 0.5f - 0.26f, Mathf.Round(transform.position.x / 0.5f) * 0.5f + 0.26f) ;
-           var y = Mathf.Clamp(mousPos.y, Mathf.Round((transform.position.y - offset )/ 0.5f )* 0.5f  - 0.26f, Mathf.Round((transform.position.y - offset) / 0.5f )* 0.5f  + 0.26f);
-
-            Debug.Log("X = ( " + x + ") Y = (" + y +")");
-
-            //Debug.Log(mousPos);
-            //var SpawnPos = new Vector3( Mathf.RoundToInt(SpawnPoint.transform.position.x /0.5f) * 0.5f + 0.25f, Mathf.RoundToInt(SpawnPoint.transform.position.y/ 0.5f) * 0.5f + 0.25f, 0);
-
-          
-            var SpawnPos = new Vector3( Mathf.Round(x / 0.5f) * 0.5f  , Mathf.Round(y / 0.5f )* 0.5f, 0);
-            
-            //Debug.Log(SpawnPos.x + " | " + SpawnPos.y);
-           // var SpawnPos = new Vector3(x,y);
-
-            Instantiate(GunTurretPrefab, SpawnPos, Quaternion.identity);
-            Debug.Log("SpawnTurret");
+			Instantiate(GunTurretPrefab, new Vector3(x + 0.25f, y + 0.25f, 0), Quaternion.identity);
+        //    Debug.Log("SpawnTurret");
         }
 
         if(Input.GetMouseButtonUp(1))
@@ -63,14 +61,17 @@ public class SpawnTurret : MonoBehaviour {
 
     private void GhostBoxCalc()
     {
-        var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
+		var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
 
-        var x = Mathf.Clamp(mousPos.x, Mathf.Round(transform.position.x / 0.5f) * 0.5f - 0.26f, Mathf.Round(transform.position.x / 0.5f) * 0.5f + 0.26f);
-        var y = Mathf.Clamp(mousPos.y, Mathf.Round((transform.position.y - offset) / 0.5f) * 0.5f - 0.26f, Mathf.Round((transform.position.y - offset) / 0.5f) * 0.5f + 0.26f);
+		var playerX = Mathf.Floor((transform.position.x) / 0.5f) * 0.5f;//Player Snapped Node Position X
+		var playerY = Mathf.Floor((transform.position.y - offset) / 0.5f) * 0.5f;//Player Snapped Node Position Y
 
-        Debug.Log("X = ( " + x + ") Y = (" + y + ")");
 
-        GhostBox.transform.position = new Vector3(Mathf.Round(x / 0.5f) * 0.5f , Mathf.Round(y / 0.5f) * 0.5f, 0);
+		var x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 0.5f, playerX + 0.5f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+		var y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 0.5f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+		//	Debug.Log("X = ( " + x + ") Y = (" + y + ")");
 
-    }
+		GhostBox.transform.position = new Vector3(x + 0.25f, y + 0.25f, 0);//Visual TestBox
+
+	}
 }
