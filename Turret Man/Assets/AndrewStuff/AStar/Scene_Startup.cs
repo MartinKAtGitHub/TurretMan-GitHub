@@ -45,8 +45,11 @@ public class Scene_Startup : MonoBehaviour {
 			//	TheTriangleMaker.LineCheckup(testing, points[0], points[1]);
 			//	TheTriangleMaker.PointCheckup(testing, points[0]);
 
-		
+			
 			TheTriangleMaker.CheckIfPointIsInside(points);
+			foreach(Triangles s in Triangles) {
+				s.TriangleColor = Color.HSVToRGB(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+			}
 		//	TheTriangleMaker.BeforeCheck(points);
 
 
