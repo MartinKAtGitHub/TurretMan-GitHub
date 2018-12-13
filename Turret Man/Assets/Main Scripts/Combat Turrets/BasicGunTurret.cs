@@ -36,6 +36,7 @@ public class BasicGunTurret : MonoBehaviour {
 
 	void Update ()
     {
+        RemoveDestroyedTargets();
         TargetNearest();
         TrackTarget();
         ShootTarget();
@@ -51,6 +52,7 @@ public class BasicGunTurret : MonoBehaviour {
 
         for (int i = 0; i < validTargets.Count; i++)
         {
+            //RemoveDestroyedTargets();
             float dist = Vector3.Distance(transform.position, validTargets[i].transform.position);
 
             if (!curTarget || dist < closestDist)
@@ -87,8 +89,10 @@ public class BasicGunTurret : MonoBehaviour {
 
             if (fireTimer >= ShootEvery)
             {
-                 var bulletClone = Instantiate(Bullet, GunBarrel.transform.position, lookAtRotation);
-                bulletClone.GetComponent<TurretBullet>().FireProjectile(GunBarrel, primaryTarget, Dmg, bulletSpeed);
+                var bulletClone = Instantiate(Bullet, GunBarrel.transform.position, lookAtRotation);
+                var bullet = bulletClone.GetComponent<TurretBullet>();
+                bullet.MyTurret = this;
+                bullet.FireProjectile(GunBarrel, primaryTarget, Dmg, bulletSpeed);
                 fireTimer = 0.0f;
             }
         }
@@ -133,4 +137,20 @@ public class BasicGunTurret : MonoBehaviour {
     }
 
 
+    //public void RemoveTargetFromValidList(GameObject target)
+    //{
+    //    targets.Remove(target);
+    //}
+
+    private void RemoveDestroyedTargets()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            if(!targets[i].gameObject)
+            {
+                //Debug.LogWarning("REMOVEING DESTOREUD TARGET FROM LIST");
+                targets.RemoveAt(i);
+            }
+        }
+    }
 }

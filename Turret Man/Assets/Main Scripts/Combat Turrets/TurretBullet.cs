@@ -9,6 +9,7 @@ public class TurretBullet : MonoBehaviour {
     /// </summary>
     public float MaxBulletTravelDistance;
     public GameObject Target;
+    public BasicGunTurret MyTurret;
 
     private int dmg;
     private float bulletSpeed;
@@ -43,9 +44,15 @@ public class TurretBullet : MonoBehaviour {
 
      void OnCollisionEnter2D(Collision2D other)
      {
-        if (other.gameObject == Target)
+        if (other.gameObject.tag == Target.gameObject.tag)
         {
-            Debug.Log("Target Hit");
+            var enemyStatus = other.gameObject.GetComponent<EnemyHealthSystem>();
+            enemyStatus.TakeDmg(dmg);
+            //if(enemyStatus.IsEnemyDead())
+            //{
+            //    MyTurret.RemoveTargetFromValidList(other.gameObject);
+            //}
+           // Debug.Log("Target Hit = " + other.gameObject.name);
         }
 
         if (other.gameObject.GetComponent<TurretBullet>() == null)
