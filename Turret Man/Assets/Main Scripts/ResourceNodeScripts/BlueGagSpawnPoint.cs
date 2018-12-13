@@ -6,16 +6,7 @@ using UnityEngine;
 //[ExecuteInEditMode]
 public class BlueGagSpawnPoint : MonoBehaviour {
 
-    BlueGagsSpawner BGS;
+    private BlueGagsSpawner blueGagsSpawner; // TODO i need to hook this up to the Spawner
+    public bool SpawnPointOccupied;
 
-    // I dont think this should be done IN game --> the ref should be set up in the Editor but i am not sure of to set it up
-    private void Awake()
-    {
-        BlueGagsSpawner.SpawnPoints.Add(gameObject);
-    }
-
-    private void OnDestroy()
-    {
-        BlueGagsSpawner.SpawnPoints.Remove(gameObject);
-    }
 }

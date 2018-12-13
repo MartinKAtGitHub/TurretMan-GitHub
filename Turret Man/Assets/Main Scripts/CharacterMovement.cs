@@ -24,7 +24,7 @@ public class CharacterMovement : MonoBehaviour
     /// </summary>
 	[SerializeField] private Transform CharacterGraphics;
 
-    private  Animator heroAnimator;
+    private  Animator characterAnimator;
     private Rigidbody2D playerRigBdy;
 
     public bool canPlayerMove;
@@ -58,11 +58,12 @@ public class CharacterMovement : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
+        facingRigth = true;
         canPlayerMove = true;
         CurrentSpeed = BaseSpeed;
        
         playerRigBdy = GetComponent<Rigidbody2D>();
-        heroAnimator = GetComponent<Animator>();
+        characterAnimator = GetComponent<Animator>();
        
     }
 
@@ -98,6 +99,10 @@ public class CharacterMovement : MonoBehaviour
     public void Flip() // TODO update Flip() Method to use the sprite flip insted of scale *-1
     {
         facingRigth = !facingRigth;
+      //  Vector3 theScale = transform.localScale;
+      //  theScale.x *= -1;
+      //  transform.localScale = theScale;
+
         Vector3 theScale = CharacterGraphics.localScale;
         theScale.x *= -1;
         CharacterGraphics.localScale = theScale;
@@ -116,11 +121,11 @@ public class CharacterMovement : MonoBehaviour
     {
         if (Mathf.Abs(Direction.x) > 0 || Mathf.Abs(Direction.y) > 0)
         {
-            heroAnimator.SetBool("Running", true);
+            characterAnimator.SetBool("Running", true);
         }
         else
         {
-            heroAnimator.SetBool("Running", false);
+            characterAnimator.SetBool("Running", false);
         }
 
     }
