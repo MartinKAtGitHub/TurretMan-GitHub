@@ -109,7 +109,7 @@ public class BasicGunTurret : MonoBehaviour {
         if (other.CompareTag(EnemyTag))
         {
             Debug.Log("Added Enemy");
-          //  other.gameObject.GetComponent<EnemyHealthSystem>().DeathEvent += OnTargetDeath;
+            other.gameObject.GetComponent<EnemyHealthSystem>().DeathEvent += RemoveTargetFromValidList;
             targets.Add(other.gameObject); 
 
             //Get Ref and add to EVENT here 
@@ -130,17 +130,15 @@ public class BasicGunTurret : MonoBehaviour {
     }
 
 
-    //public void RemoveTargetFromValidList(GameObject target)
-    //{
-    //    targets.Remove(target);
-    //}
-
-
-
-    public void OnTargetDeath()
+    public void RemoveTargetFromValidList(GameObject target)
     {
-       
+        Debug.Log("REMOVING = " + target.name);
+        target.GetComponent<EnemyHealthSystem>().DeathEvent -= RemoveTargetFromValidList;
+        targets.Remove(target);
+        
     }
+
+    
 
     private void RemoveDestroyedTargets()
     {
