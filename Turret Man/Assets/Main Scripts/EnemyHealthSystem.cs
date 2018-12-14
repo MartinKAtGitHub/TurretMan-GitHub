@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class EnemyHealthSystem : MonoBehaviour {
 
-  //  public delegate void DeathDelegate();
-  //  public event DeathDelegate DeathEvent;
+    public delegate void DeathDelegate(GameObject target);
+    public event DeathDelegate DeathEvent;
 
     public int MaxHP;
     public int CurrentHP;
@@ -41,10 +41,10 @@ public class EnemyHealthSystem : MonoBehaviour {
 
     private void EnemyDeath()
     {
-        //if(DeathEvent != null)
-        //{
-        //    DeathEvent();
-        //}
+        if (DeathEvent != null)
+        {
+            DeathEvent(this.gameObject);
+        }
 
         //play death anim
         isEnemyDead = true;
