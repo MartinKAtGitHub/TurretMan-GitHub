@@ -57,7 +57,7 @@ public abstract class InventoryItem : MonoBehaviour, IComparable<InventoryItem> 
         }else
         {
             // TODO If 2 items have the same KeyID i need to cancel the Change Or handle it in some other way.
-            Debug.LogError(ItemName + " | AND | " + other.ItemName + " | Have same KeyID -- > Keys are now Broken may crash");
+            //Debug.LogError(ItemName + " | AND | " + other.ItemName + " | Have same KeyID -- > Keys are now Broken may crash");
             return 0;
         }
     }

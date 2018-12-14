@@ -44,7 +44,7 @@ public class TurretBullet : MonoBehaviour {
 
      void OnCollisionEnter2D(Collision2D other)
      {
-        if (other.gameObject.tag == Target.gameObject.tag)
+        if (other.gameObject == Target.gameObject)
         {
             var enemyStatus = other.gameObject.GetComponent<EnemyHealthSystem>();
             enemyStatus.TakeDmg(dmg);

@@ -7,9 +7,12 @@ public class SpawnTurret : MonoBehaviour {
     public GameObject SpawnPoint;
     public GameObject GunTurretPrefab;
     public float offset;
+
+    public int Cost;
+
    [SerializeField] Camera cam;
 
-	public bool ShowTestBox = true;
+    [SerializeField] private bool canPlaceTurret;
     [SerializeField]GameObject GhostBox;
 	// Use this for initialization
 
@@ -18,13 +21,15 @@ public class SpawnTurret : MonoBehaviour {
 
 	void Start ()
     {
+        canPlaceTurret = true;
         cam = Camera.main;
 
-		if(ShowTestBox == true) {
-			GhostBox.SetActive(true);
-		} else {
-			GhostBox.SetActive(false);
-		}
+		//if(ShowTestBox == true) {
+		//	GhostBox.SetActive(true);
+		//} else {
+		//	GhostBox.SetActive(false);
+		//}
+
 
 
 	}
@@ -32,67 +37,71 @@ public class SpawnTurret : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-		if(ShowTestBox == true) {
-			GhostBoxCalc();
-		}
+		
+         GhostBox.transform.position = SnappingSystem();
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && canPlaceTurret && CanPlayerPayForMachine())
         {
-			var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
-
-			var playerX = Mathf.Floor((transform.position.x) / 0.5f) * 0.5f;//Player Snapped Node Position X
-			var playerY = Mathf.Floor((transform.position.y - offset) / 0.5f) * 0.5f;//Player Snapped Node Position Y (- offset) 
-	
-			if(transform.position.x / 0.5f % 1 < 0.5f) {//Increasing The Distance The Player Can Click To The Left (-1 == 2 nodes)
-				x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 1f, playerX + 0.5f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-			} else {//Increasing The Distance The Player Can Click To The Right (+1 == 2 nodes)
-				x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 0.5f, playerX + 1f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-			}
-
-			if ((transform.position.y - offset) / 0.5f % 1 < 0.5f) {//Increasing The Distance The Player Can Click Down (-1 == 2 nodes)
-				y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-			} else {//Increasing The Distance The Player Can Click Up (+1 == 2 nodes)
-				y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-			}
-
-			Instantiate(GunTurretPrefab, new Vector3(x + 0.25f, y + 0.25f, 0), Quaternion.identity);
-        //    Debug.Log("SpawnTurret");
+           // Debug.Log("Spawning TURRET");
+            Instantiate(GunTurretPrefab, SnappingSystem(), Quaternion.identity);
+            GameManager.Instance.PlayerResources.CurrentResources -= Cost;
         }
-
-        if(Input.GetMouseButtonUp(1))
-        {
-            var SpawnPos = new Vector3( Mathf.RoundToInt(SpawnPoint.transform.position.x /0.5f) * 0.5f + 0.25f, Mathf.RoundToInt(SpawnPoint.transform.position.y/ 0.5f) * 0.5f + 0.25f, 0);
-            Instantiate(GunTurretPrefab, SpawnPos, Quaternion.identity);
-
-        }
-
-
 
     }
+    
 
-
-    private void GhostBoxCalc()
+    private Vector3 SnappingSystem()
     {
-		var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
+        var mousPos = cam.ScreenToWorldPoint(Input.mousePosition);
 
-		var playerX = Mathf.Floor((transform.position.x) / 0.5f) * 0.5f;//Player Snapped Node Position X
-		var playerY = Mathf.Floor((transform.position.y - offset) / 0.5f) * 0.5f;//Player Snapped Node Position Y
+        var playerX = Mathf.Floor((transform.position.x) / 0.5f) * 0.5f;//Player Snapped Node Position X
+        var playerY = Mathf.Floor((transform.position.y - offset) / 0.5f) * 0.5f;//Player Snapped Node Position Y
 
 
-		if (transform.position.x / 0.5f % 1 < 0.5f) {//Increasing The Distance The Player Can Click To The Left (-1 == 2 nodes)
-			x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 1f, playerX + 0.5f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-		} else {//Increasing The Distance The Player Can Click To The Right (+1 == 2 nodes)
-			x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 0.5f, playerX + 1f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-		}
+        if (transform.position.x / 0.5f % 1 < 0.5f)
+        {//Increasing The Distance The Player Can Click To The Left (-1 == 2 nodes)
+            x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 1f, playerX + 0.5f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+        }
+        else
+        {//Increasing The Distance The Player Can Click To The Right (+1 == 2 nodes)
+            x = Mathf.Clamp(Mathf.Floor((mousPos.x) / 0.5f) * 0.5f, playerX - 0.5f, playerX + 1f);//Finding Mouse Node Position X, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+        }
 
-		if ((transform.position.y - offset) / 0.5f % 1 < 0.5f) {//Increasing The Distance The Player Can Click Down (-1 == 2 nodes)
-			y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-		} else {//Increasing The Distance The Player Can Click Up (+1 == 2 nodes)
-			y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
-		}
-		//	Debug.Log("X = ( " + x + ") Y = (" + y + ")");
+        if ((transform.position.y - offset) / 0.5f % 1 < 0.5f)
+        {//Increasing The Distance The Player Can Click Down (-1 == 2 nodes)
+            y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+        }
+        else
+        {//Increasing The Distance The Player Can Click Up (+1 == 2 nodes)
+            y = Mathf.Clamp(Mathf.Floor((mousPos.y) / 0.5f) * 0.5f, playerY - 0.5f, playerY + 1f);//Finding Mouse Node Position Y, Then Clamping It To Find The Most Left And Most Right Position The Mouse Can Be At
+        }
+        //	Debug.Log("X = ( " + x + ") Y = (" + y + ")");
 
-		GhostBox.transform.position = new Vector3(x + 0.25f, y + 0.25f, 0);//Visual TestBox
+        return new Vector3(x + 0.25f, y + 0.25f, 0);
+    }
 
-	}
+    private bool CanPlayerPayForMachine()
+    {
+        //return GameManager.Instance.PlayerResources.CurrentResources >= cost;
+
+        if (GameManager.Instance.PlayerResources.CurrentResources >= Cost)
+        {
+            return true;
+        }
+        else
+        {
+            Debug.Log("Player can NOT pay for " + GunTurretPrefab.name);
+            return false;
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+       // Debug.Log("LOCKED");
+        canPlaceTurret = false;  
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+       // Debug.Log("FREE");
+        canPlaceTurret = true;
+    }
 }

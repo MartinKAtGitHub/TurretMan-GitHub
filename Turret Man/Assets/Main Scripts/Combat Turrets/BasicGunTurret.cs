@@ -122,7 +122,7 @@ public class BasicGunTurret : MonoBehaviour {
         {
             if (other.gameObject == targets[i])
             {
-                Debug.Log("Removed Enemy");
+               // Debug.Log("Removed Enemy");
                 targets.Remove(other.gameObject);
                 return;
             }
@@ -132,7 +132,7 @@ public class BasicGunTurret : MonoBehaviour {
 
     public void RemoveTargetFromValidList(GameObject target)
     {
-        Debug.Log("REMOVING = " + target.name);
+       // Debug.Log("REMOVING = " + target.name);
         target.GetComponent<EnemyHealthSystem>().DeathEvent -= RemoveTargetFromValidList;
         targets.Remove(target);
         
