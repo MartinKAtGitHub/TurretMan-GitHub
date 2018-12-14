@@ -40,7 +40,7 @@ public class SpawnTurret : MonoBehaviour {
 		
          GhostBox.transform.position = SnappingSystem();
 
-        if (Input.GetMouseButtonUp(0) && canPlaceTurret && CanPlayerPayForMachine())
+        if (Input.GetMouseButtonUp(1) && canPlaceTurret && CanPlayerPayForMachine())
         {
            // Debug.Log("Spawning TURRET");
             Instantiate(GunTurretPrefab, SnappingSystem(), Quaternion.identity);

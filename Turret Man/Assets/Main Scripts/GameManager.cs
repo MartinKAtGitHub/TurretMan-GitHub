@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour {
     [HideInInspector]public PlayerResources PlayerResources;
     public GameObject WinPnl;
     public GameObject MainMenu;
+    public GameObject EscPnl;
 
     public static GameManager Instance = null;              //Static instance of GameManager which allows it to be accessed by any other script.
 
@@ -20,6 +21,8 @@ public class GameManager : MonoBehaviour {
 
 
     public int GagWinCondition;
+
+    private bool isGamePaused;
     //Awake is always called before any Start functions
     void Awake()
     {
@@ -47,12 +50,30 @@ public class GameManager : MonoBehaviour {
 
     private void Update()
     {
-       
+       if(Input.GetKeyDown(KeyCode.Escape) && SceneManager.GetActiveScene().buildIndex != 0)
+        {
+            Debug.Log("Esc MENU");
+            PauseGame();
+        }
 
     }
 
 
-
+    public void PauseGame()
+    {
+        if(isGamePaused)
+        {
+            isGamePaused = false;
+            EscPnl.SetActive(false);
+            Time.timeScale = 1;
+        }
+        else
+        {
+            isGamePaused = true;
+            EscPnl.SetActive(true);
+            Time.timeScale = 0;
+        }
+    }
 
     public void CallWinEvent()
     {
