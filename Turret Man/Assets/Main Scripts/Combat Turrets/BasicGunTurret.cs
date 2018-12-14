@@ -103,23 +103,16 @@ public class BasicGunTurret : MonoBehaviour {
         return targets;
     }
 
-    public bool InRange(GameObject go)
-    {
-        for (int i = 0; i < targets.Count; i++)
-        {
-            if (go == targets[i])
-                return true;
-        }
-
-        return false;
-    }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag(EnemyTag))
         {
             Debug.Log("Added Enemy");
+          //  other.gameObject.GetComponent<EnemyHealthSystem>().DeathEvent += OnTargetDeath;
             targets.Add(other.gameObject); 
+
+            //Get Ref and add to EVENT here 
         } 
     }
 
@@ -141,6 +134,13 @@ public class BasicGunTurret : MonoBehaviour {
     //{
     //    targets.Remove(target);
     //}
+
+
+
+    public void OnTargetDeath()
+    {
+       
+    }
 
     private void RemoveDestroyedTargets()
     {
