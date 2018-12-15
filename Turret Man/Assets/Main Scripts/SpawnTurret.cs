@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpawnTurret : MonoBehaviour {
+public class SpawnTurret : InventoryItem {
 
-    public GameObject SpawnPoint;
+    //public GameObject SpawnPoint;
     public GameObject GunTurretPrefab;
     public float offset;
 
@@ -13,16 +13,18 @@ public class SpawnTurret : MonoBehaviour {
    [SerializeField] Camera cam;
 
     [SerializeField] private bool canPlaceTurret;
-    [SerializeField]GameObject GhostBox;
-	// Use this for initialization
+    [SerializeField] GameObject GhostBox;
+    [SerializeField] Animator playerAnimator;
+    // Use this for initialization
 
-	float x;
+    float x;
 	float y;
 
 	void Start ()
     {
         canPlaceTurret = true;
         cam = Camera.main;
+        playerAnimator = GetComponent<Animator>();
 
 		//if(ShowTestBox == true) {
 		//	GhostBox.SetActive(true);
@@ -40,12 +42,12 @@ public class SpawnTurret : MonoBehaviour {
 		
          GhostBox.transform.position = SnappingSystem();
 
-        if (Input.GetMouseButtonUp(1) && canPlaceTurret && CanPlayerPayForMachine())
+      /*  if (Input.GetMouseButtonUp(1) && canPlaceTurret && CanPlayerPayForMachine())
         {
-           // Debug.Log("Spawning TURRET");
+            playerAnimator.SetTrigger("Build");
             Instantiate(GunTurretPrefab, SnappingSystem(), Quaternion.identity);
             GameManager.Instance.PlayerResources.CurrentResources -= Cost;
-        }
+        }*/
 
     }
     
@@ -104,4 +106,25 @@ public class SpawnTurret : MonoBehaviour {
        // Debug.Log("FREE");
         canPlaceTurret = true;
     }
+
+   /* private void OnTriggerStay2D(Collider2D collision)
+    {
+         Debug.Log("LOCKED === " + collision.name );
+        canPlaceTurret = false;
+    }*/
+
+    public override void Action()
+    {
+        if(canPlaceTurret && CanPlayerPayForMachine())
+        {
+            playerAnimator.SetTrigger("Build");
+            Instantiate(GunTurretPrefab, SnappingSystem(), Quaternion.identity);
+            GameManager.Instance.PlayerResources.CurrentResources -= Cost;
+        }
+        else
+        {
+            Debug.LogWarning("Turret Blocked (" + canPlaceTurret + ") Can Pay For Turret( " + CanPlayerPayForMachine() + ") NEEED UI!!");
+        }
+
+     }
 }

@@ -40,17 +40,26 @@ public class MiningMachineSpawnerTool : InventoryItem { // This might become a t
 
     public override void Action()
     {
-        if(inRangeOfGagNode && CanPlayerPayForMachine() && !node.HasMiningMachine)
+        if(node != null)
         {
-            playerAnimator.SetTrigger("Build");
+            if (inRangeOfGagNode && CanPlayerPayForMachine() && !node.HasMiningMachine)
+            {
+                playerAnimator.SetTrigger("Build");
+            }
+            else
+            {
+               Debug.Log(" Is Player within range (" + inRangeOfGagNode + ") " +
+                    "Can player Pay for Machine(" + CanPlayerPayForMachine() + ") " +
+                    " Node Has miningMachine (" + node.HasMiningMachine + ") ");
+            }
+            //SpawnMiningMachine();
         }
         else
         {
-            Debug.Log(" Is Player within range (" + inRangeOfGagNode + ") " +
-                "Can player Pay for Machine(" + CanPlayerPayForMachine() + ") " + 
-                " Node Has miningMachine (" + node.HasMiningMachine + ") ");
+            Debug.Log("NO NODE IN RAGE BRHU !!! MAKE UI");
         }
-        //SpawnMiningMachine();
+
+
     }
 
     private void SpawnMiningMachine()

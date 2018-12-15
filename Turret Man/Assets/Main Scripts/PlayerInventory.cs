@@ -2,18 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+using UnityEngine.UI;
 public class PlayerInventory : MonoBehaviour {
 
+    
     public List<InventoryItem> inventoryItems;
 
     [SerializeField]private InventoryItem selectedInventoryItem;
 
-	void Start ()
+
+    public GameObject SelectedItemImage_GO;
+    private Image selectedItem_Image;  
+    private Animator selectedItemImage_Animator;
+
+    void Start ()
     {
         // inventoryItems.AddRange( GetComponentsInChildren<InventoryItem>() );
-         inventoryItems.AddRange( GetComponents<InventoryItem>() );
+        inventoryItems.AddRange( GetComponents<InventoryItem>() );
         PairInventoryItemsToInputKeys();
+        selectedItem_Image = SelectedItemImage_GO.GetComponent<Image>();
+        selectedItemImage_Animator =  SelectedItemImage_GO.GetComponent<Animator>();
+
     }
 	
 	
@@ -36,7 +45,7 @@ public class PlayerInventory : MonoBehaviour {
       
         }
 
-        if( (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Return))  /* && inventoryKeyLoock == false */)
+        if( (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonUp(1))  /* && inventoryKeyLoock == false */)
         {
             GetSelectedInventoryItemAction();
         }
@@ -58,6 +67,8 @@ public class PlayerInventory : MonoBehaviour {
         else
         {
             selectedInventoryItem = item;
+            selectedItem_Image.sprite = selectedInventoryItem.ItemIcon;
+            selectedItemImage_Animator.SetTrigger("SetNewItem");
         }
 
         //selectedInventoryItem = item;

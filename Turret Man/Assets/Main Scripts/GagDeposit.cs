@@ -5,23 +5,24 @@ using UnityEngine;
 public class GagDeposit : MonoBehaviour
 {
     public string RocketShipTag;
-    public int GagWinConditionLimit;
+   [HideInInspector] public int GagWinConditionLimit;
+    public Animator NotEnoughMinerals_Animator;
 
     private bool CanDepositGag;
     private bool GameWon;
 
     void Start()
     {
-        
+        GagWinConditionLimit = GameManager.Instance.GagWinCondition;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space) && CanDepositGag && !GameWon)
+       /* if(Input.GetKeyDown(KeyCode.Space) && CanDepositGag && !GameWon)
         {
             IsWinConditionMet();
-        }
+        }*/
     }
 
 
@@ -35,7 +36,8 @@ public class GagDeposit : MonoBehaviour
         }
         else
         {
-            Debug.Log("Win Condition not Met");
+            NotEnoughMinerals_Animator.SetTrigger("NotEnoughMinerals");
+           //Debug.Log("Win Condition not Met !!!!!!!!!!MAKE UI");
         }
 
     }
@@ -56,11 +58,13 @@ public class GagDeposit : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        // input in here lul `????? NO TIME!!
-    }
 
-    private void OnPlayerWinDepositAnimEvent()
-    {
-
+        if (Input.GetKeyDown(KeyCode.Space) && !GameWon && collision.tag == RocketShipTag)
+        {
+            IsWinConditionMet();
+        }
     }
 }
+
+  
+

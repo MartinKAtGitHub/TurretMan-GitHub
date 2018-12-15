@@ -6,6 +6,7 @@ using System;
 
 public abstract class InventoryItem : MonoBehaviour, IComparable<InventoryItem> {
 
+    public Sprite ItemIcon;
     /// <summary>
     /// Lock the button/key so you can just spam the item. You must wait for the Item Animation or whatever before you can use it again
     /// </summary>

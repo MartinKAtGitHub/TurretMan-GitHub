@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour {
 
     [HideInInspector]public PlayerResources PlayerResources;
-    public GameObject WinPnl;
-    public GameObject MainMenu;
+    //public GameObject WinPnl;
+    //public GameObject MainMenu;
     public GameObject EscPnl;
 
     public static GameManager Instance = null;              //Static instance of GameManager which allows it to be accessed by any other script.
@@ -21,8 +21,9 @@ public class GameManager : MonoBehaviour {
 
 
     public int GagWinCondition;
-
+    public int GagStartAmount;
     private bool isGamePaused;
+    public bool Victory;
     //Awake is always called before any Start functions
     void Awake()
     {
@@ -43,7 +44,7 @@ public class GameManager : MonoBehaviour {
 
         PlayerResources = GetComponent<PlayerResources>();
 
-        WinPnl.SetActive(false);
+       // WinPnl.SetActive(false);
         SceneManager.sceneLoaded += OnSceneLoade;
     }
 
@@ -86,16 +87,18 @@ public class GameManager : MonoBehaviour {
 
     public void GameWin()
     {
-        Time.timeScale = 0f; // pause game
-        WinPnl.SetActive(true);
-        
+        // Time.timeScale = 0f; // pause game
+        //  WinPnl.SetActive(true);
+
         // Start Game Win UI
-        
+        CallWinEvent();
+        Victory = true;
     }
 
     public void ReStartLevel()
     {
         Debug.Log("Restarting Level");
+        this.PlayerResources.CurrentResources = GagStartAmount;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
@@ -107,6 +110,7 @@ public class GameManager : MonoBehaviour {
 
     public void GoToMainMenu()
     {
+        SceneManager.LoadScene(0);
         Debug.Log("Go to game main menu screen");
     }
 
@@ -119,15 +123,15 @@ public class GameManager : MonoBehaviour {
     private void OnSceneLoade(Scene scene,LoadSceneMode mode)
     {
         
-        Time.timeScale = 1f;
-        WinPnl.SetActive(false);
+      // Time.timeScale = 1f;
+       // WinPnl.SetActive(false);
         
 
-       if (SceneManager.GetActiveScene().buildIndex != 0)
+      /* if (SceneManager.GetActiveScene().buildIndex != 0)
         {
 
            MainMenu.SetActive(false);
-        }
+        }*/
     }
 
     void OnDisable()
